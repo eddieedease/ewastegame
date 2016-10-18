@@ -48,6 +48,8 @@
 
 
 
+
+
     Breakout.prototype = {
 
         create: function() {
@@ -269,7 +271,7 @@
             if (ballOnPaddle) {
                 bothballsdown = false;
                 ballOnPaddle = false;
-                ball.body.velocity.y = -300;
+                ball.body.velocity.y = -200;
                 ball.body.velocity.x = -75;
                 ball.animations.play('spin');
                 introText.visible = false;
@@ -282,7 +284,7 @@
             if (ballOnPaddle2) {
                 bothballsdown = false;
                 ballOnPaddle2 = false;
-                ball2.body.velocity.y = -300;
+                ball2.body.velocity.y = -200;
                 ball2.body.velocity.x = 75;
                 ball2.animations.play('spin');
                 introText.visible = false;
@@ -290,7 +292,6 @@
 
         },
         levelup: function() {
-
             if (bgbool === false) {
                 bg1.visible = false;
                 bg2.visible = true;
@@ -323,7 +324,6 @@
           lives = lives + 1;
           livesText.text = 'levens: ' + lives;
           lifeactive = false;
-
         },
 
         removelevelup: function() {
@@ -337,8 +337,6 @@
             lives--;
             livesText.text = 'levens: ' + lives;
 
-
-
             if (lives === 0) {
                 this.thisOver();
             } else {
@@ -346,11 +344,7 @@
                 if (ballOnPaddle2 === true) {
                     bothballsdown = true;
                 }
-
-
-
                 //ballOnPaddle = true;
-
                 ball.reset(paddle.body.x, paddle.y - 56);
                 //ball2.reset(paddle2.body.x + 16, paddle2.y - 56);
                 ball.animations.stop();
@@ -378,22 +372,15 @@
         },
 
         thisOver: function() {
-
-
-
             this.game.scorep1 = score;
             this.game.scorep2 = null;
-
-
             //this.game.p2score = score2;
-
             ball.body.velocity.setTo(0, 0);
             introText.text = 'Helaas! Game Over!';
             introText.visible = true;
             ballOnPaddle = true;
             ball.reset(paddle.body.x, paddle.y - 56);
             ball.animations.stop();
-
             if (this.game.multiplay === true) {
                 ball2.body.velocity.setTo(0, 0);
                 ballOnPaddle2 = true;
@@ -458,25 +445,21 @@
 
         },
         ballHitPaddle: function(_ball, _paddle) {
-
             var diff = 0;
-
             if (_ball.x < _paddle.x) {
                 //  Ball is on the left-hand side of the paddle
                 diff = _paddle.x - _ball.x;
-                _ball.body.velocity.x = (-10 * diff);
+                _ball.body.velocity.x = (-8 * diff);
             } else if (_ball.x > _paddle.x) {
                 //  Ball is on the right-hand side of the paddle
                 diff = _ball.x - _paddle.x;
-                _ball.body.velocity.x = (10 * diff);
+                _ball.body.velocity.x = (8 * diff);
             } else {
                 //  Ball is perfectly in the middle
                 //  Add a little random X to stop it bouncing straight up!
-                _ball.body.velocity.x = 2 + Math.random() * 8;
+                _ball.body.velocity.x = 2 + Math.random() * 6;
             }
-
         }
-
     };
 
     window['ewaste'] = window['ewaste'] || {};

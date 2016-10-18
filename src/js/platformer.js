@@ -89,6 +89,10 @@
 
     var credit;
 
+    var bg1;
+    var bg2;
+    var bg3;
+
 
 
     Platformer.prototype = {
@@ -112,7 +116,11 @@
             audiocoin = this.game.add.audio('coin');
 
             //  A simple background for our game
-            this.game.add.sprite(0, -60, 'sky');
+            bg1 = this.game.add.sprite(0, -60, 'sky');
+            bg2 = this.game.add.sprite(0, -60, 'pbbg2');
+            bg2.visible = false;
+            bg3 = this.game.add.sprite(0, -60, 'pbbg3');
+            bg3.visible = false;
 
             //  The platforms group contains the ground and the 2 ledges we can jump on
             platforms = this.game.add.group();
@@ -487,7 +495,6 @@
                 case 2:
                     enemyspeed1 = 130;
                     enemyspeed2 = -130;
-
                     break;
                 case 3:
                     enemyspeed1 = 200;
@@ -500,6 +507,9 @@
                     lifeup.revive();
                     break;
                 case 4:
+                    bg1.visible = false;
+                    bg2.visible = true;
+                    bg3.visible = false;
                     enemyspeed1 = 230;
                     enemyspeed2 = -230;
                     break;
@@ -518,6 +528,9 @@
                     enemyspeed2 = -360;
                     break;
                 case 7:
+                    bg1.visible = false;
+                    bg2.visible = false;
+                    bg3.visible = true;
                     enemyspeed1 = 400;
                     enemyspeed2 = -400;
                     var randomx = this.game.rnd.integerInRange(0, 1000);
@@ -537,16 +550,12 @@
                     lifeup.kill();
                     lifeup.revive();
                     break;
-
-
             }
 
         },
         removelevelup: function() {
             levelup.destroy();
             leveluptween = null;
-
-
         },
         collectlife: function(platplayer1, life) {
             {

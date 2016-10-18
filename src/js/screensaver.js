@@ -22,6 +22,9 @@
     var keyup;
     var keydown;
 
+    var video;
+    var sprite;
+
     var cursors;
     var keycursors;
 
@@ -52,8 +55,8 @@
 
     Screensaver.prototype = {
         create: function() {
-          credit = localStorage.getItem('credits');
-
+            credit = localStorage.getItem('credits');
+            video = null;
             /*canvas = this.game.add.bitmapData(1000, 563);
             canvas.addToWorld();
 
@@ -75,10 +78,18 @@
               zz3[b] = Math.floor(Math.random() * 1700) - 100;
             }*/
 
-            text = this.game.add.bitmapText(this.game.width / 2, this.game.height / 3, 'scorefont', 'FUNKY PHONE', 50);
+            text = this.game.add.bitmapText(this.game.width / 2, this.game.height / 5, 'scorefont', 'Recycle je telefoon\n en speel games', 50);
             text.align = "center";
 
 
+            video = this.game.add.video('introfilm');
+            this.game.time.events.add(Phaser.Timer.SECOND * 60, this.restartVid, this);
+
+
+            sprite = video.addToWorld(0, 0, 0, 0);
+            sprite.x = 115;
+            sprite.y = 180;
+            video.play();
             text.anchor.set(0.5);
             cursors = this.game.input.keyboard.createCursorKeys();
 
@@ -126,17 +137,21 @@
 
 
         },
+        restartVid: function() {
+          video.play();
+        },
+
         creditadd: function() {
 
 
 
 
-          credit = parseInt(credit) + 3;
+            credit = parseInt(credit) + 3;
 
-          localStorage.setItem('credits', credit);
+            localStorage.setItem('credits', credit);
 
-          this.game.aantalphones = this.game.aantalphones + 1;
-          localStorage.setItem('aantalphones', this.game.aantalphones);
+            this.game.aantalphones = this.game.aantalphones + 1;
+            localStorage.setItem('aantalphones', this.game.aantalphones);
             valid.visible = true;
             this.game.time.events.add(Phaser.Timer.SECOND * 3, this.creditgone, this);
         },
@@ -148,22 +163,22 @@
 
         update: function() {
 
-          if (cursors.left.isDown) {
-              //  Move to the left
-              this.game.state.start('menu', true, false);
-          }
-          if (cursors.right.isDown) {
-              //  Move to the left
-              this.game.state.start('menu', true, false);
-          }
-          if (cursors.up.isDown) {
-              //  Move to the left
-              this.game.state.start('menu', true, false);
-          }
-          if (cursors.down.isDown) {
-              //  Move to the left
-              this.game.state.start('menu', true, false);
-          }
+            if (cursors.left.isDown) {
+                //  Move to the left
+                this.game.state.start('menu', true, false);
+            }
+            if (cursors.right.isDown) {
+                //  Move to the left
+                this.game.state.start('menu', true, false);
+            }
+            if (cursors.up.isDown) {
+                //  Move to the left
+                this.game.state.start('menu', true, false);
+            }
+            if (cursors.down.isDown) {
+                //  Move to the left
+                this.game.state.start('menu', true, false);
+            }
             /*canvas.clear();
 
       for (var i = 0; i < max; i++) {
@@ -217,7 +232,7 @@
         onDown: function(key) {
             console.log(key.keyCode);
             if (key.keyCode === 79) {
-              return;
+                return;
             }
             if (key.keyCode === 73) {
                 keyq.enabled = false;

@@ -62,6 +62,7 @@
       this.game.load.video('film1', 'assets/films/test.mp4');
       this.game.load.video('film2', 'assets/films/test2.mp4');
       this.game.load.video('film3', 'assets/films/test3.mp4');
+      this.game.load.video('introfilm', 'assets/films/intro.mp4');
       this.load.image('film1', 'assets/film1.png');
       this.load.image('film2', 'assets/film2.png');
       this.load.image('film3', 'assets/film3.png');
@@ -74,6 +75,9 @@
       this.load.image('thumbs5', 'assets/thumbs5.png');
       this.load.image('thumbs6', 'assets/thumbs6.png');
       this.load.image('thumbsfilms', 'assets/thumbsfilms.png');
+
+      this.load.image('knoppenfilm', 'assets/knoppenfilm.png');
+      this.load.image('knoppenscore', 'assets/knoppenscore.png');
 
 
       //preload menu
@@ -146,6 +150,9 @@
       this.load.image('p1life', 'assets/p1life.png');
       this.load.image('p2life', 'assets/p2life.png');
       this.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+
+      this.load.image('pbbg2', 'assets/pbbg.png');
+      this.load.image('pbbg3', 'assets/pbbg2.png');
       //scoring
       this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
       this.loadResources();

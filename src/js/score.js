@@ -230,10 +230,10 @@
                 p1up.onDown.add(this.p1up, this);
                 p1down = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
                 p1down.onDown.add(this.p1down, this);
-
-
                 p1back = this.input.keyboard.addKey(Phaser.Keyboard.X);
                 p1back.onDown.add(this.p1back, this);
+                p2back = this.input.keyboard.addKey(Phaser.Keyboard.E);
+                p2back.onDown.add(this.p2back, this);
             } else {
                 p1ready = true;
             }
@@ -242,9 +242,6 @@
             backtomain = this.input.keyboard.addKey(Phaser.Keyboard.X);
             p1ok.onDown.add(this.p1ok, this);
             backtomain.onDown.add(this.backtomain, this);
-
-
-
 
             if (highp2 && this.game.multiplay === true) {
                 let21 = this.game.add.bitmapText(this.game.width / 2 - 100, this.game.height / 2 + 180, 'scorefont', 'a', 50);
@@ -266,15 +263,14 @@
                 p2down.onDown.add(this.p2down, this);
                 p2ok = this.input.keyboard.addKey(Phaser.Keyboard.Q);
                 p2ok.onDown.add(this.p2ok, this);
-                p2back = this.input.keyboard.addKey(Phaser.Keyboard.E);
-                p2back.onDown.add(this.p2back, this);
+                //p2back = this.input.keyboard.addKey(Phaser.Keyboard.E);
+                //p2back.onDown.add(this.p2back, this);
             } else {
                 p2ready = true;
             }
 
 
             // NOTE yes, below is the scorescreen
-
             //scorestext.visible = false;
 
             // wat als beide geen highscore hebben behaald
@@ -282,15 +278,11 @@
                 backbutton.visible = true;
                 scorestext = this.game.add.bitmapText(this.game.width / 4 * 1.5, this.game.height / 2 + 80, 'scorefont', '1  = ' + nameArray[0] + '\n2 = ' + nameArray[1] + '\n3 = ' + nameArray[2] + '\n4 = ' + nameArray[3] + '\n5 = ' + nameArray[4], 50);
                 scorestext.anchor.setTo(0.5, 0.5);
-
-
                 scoresssss = this.game.add.bitmapText(this.game.width / 4 * 3, this.game.height / 2 + 90, 'scorefont', scoresArray[0] + '\n' + scoresArray[1] + '\n' + scoresArray[2] + '\n' + scoresArray[3] + '\n' + scoresArray[4], 50);
                 scoresssss.anchor.setTo(0.5, 0.5);
                 scoreaudio.play();
                 dudes.visible = true;
                 //headertext.text = 'helaas! geen highscore';
-
-
 
                 if (this.game.multiplay === false) {
                     headertext.text = 'helaas! geen highscore' + '\n' + 'player 1: ' + scorep1;
@@ -303,6 +295,8 @@
                 headertext.anchor.set(0.5);
                 //scorestext.visible = true;
                 backtomain = true;
+                p2back = this.input.keyboard.addKey(Phaser.Keyboard.E);
+                p2back.onDown.add(this.p2back, this);
             }
 
 
@@ -351,7 +345,6 @@
                         break;
                     case "other":
                         break;
-
                 }
 
 
@@ -431,9 +424,6 @@
             }
 
             //console.log(letters1[currentnumber1]);
-
-
-
             //letters1[currentnumber1].setText = "b"
             //letters1[currentnumber1] = this.game.add.bitmapText(this.game.width / 2 - 80, this.game.height / 2, 'scorefont', alfabet[currentletter1], 50);
         },
@@ -598,9 +588,7 @@
                 this.game.state.start('menu');
                 return;
             }
-
         },
-
         p2back: function() {
             if (p2ready === false) {
                 if (currentnumber2 !== 0) {
@@ -609,6 +597,13 @@
                 } else {
                     //todo set ok for score
                 }
+            } else if (backtomain === true) {
+                if (this.game.currentgame === "racer") {
+                    location.reload();
+                }
+                scoreaudio.stop();
+                this.game.state.start('menu');
+                return;
             }
         }
 

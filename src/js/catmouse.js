@@ -126,11 +126,13 @@
 
             this.game.currentgame = "catmouse";
 
+            energyp1 = 100;
+            var energyp2 = 100;
+
             //this.stage.backgroundColor = 0x4488cc;
             this.game.add.image(0, 0, 'catmousebg');
 
             if (this.game.multiplay === true) {
-
                 catmousepp2 = this.game.add.image(835, 355, 'catmousep2');
             } else {
                 catmousepp2 = this.game.add.image(900, 500, 'catmousep2');

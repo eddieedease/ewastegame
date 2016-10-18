@@ -31,6 +31,8 @@
 
   var backbutton;
 
+  var knoppenfilm;
+
 
   Theater.prototype = {
     create: function() {
@@ -70,7 +72,7 @@
       filmarrows = this.game.add.image(this.game.width / 2 + 95, this.game.height / 2 - 70, 'filmarrows');
       filmarrows.anchor.setTo(0.5, 0.5);
 
-
+      knoppenfilm = this.game.add.image(20, this.game.height- 200, 'knoppenfilm');
 
 
     },
@@ -125,7 +127,6 @@
         filmisplaying = true;
         seats.visible = false;
         video.play();
-        video.dur
       }
     },
 
