@@ -42,7 +42,7 @@
       video = null;
 
       seats = this.game.add.image(100, 400, 'theaterseats');
-      backbutton = this.game.add.image(0, 450, 'backbutton');
+      //backbutton = this.game.add.image(0, 450, 'backbutton');
 
       left = this.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
       left.onDown.add(this.goLeft, this);
@@ -72,7 +72,7 @@
       filmarrows = this.game.add.image(this.game.width / 2 + 95, this.game.height / 2 - 70, 'filmarrows');
       filmarrows.anchor.setTo(0.5, 0.5);
 
-      knoppenfilm = this.game.add.image(20, this.game.height- 200, 'knoppenfilm');
+      knoppenfilm = this.game.add.image(20, this.game.height- 200, 'knoppenfilmwhite');
 
 
     },

@@ -77,6 +77,7 @@
     var aantalhigh = 0;
 
     var backbutton;
+    var knoppenscore;
 
     var backtomain = false;
 
@@ -112,6 +113,14 @@
             backbutton = this.game.add.sprite(25, 440, 'backbutton');
             dudes.anchor.setTo(0.5, 0.5);
             dudes.visible = false;
+
+
+
+            knoppenscore = this.game.add.sprite(25, 400, 'knoppenscore');
+            knoppenscore.visible = false;
+
+            backbutton.visible = true;
+
 
 
             scoreaudio = this.game.add.audio('scoresound');
@@ -215,6 +224,8 @@
             //NOTE settings up player inputs (iffy)
 
             if (highp1) {
+                knoppenscore.visible = true;
+                backbutton.visible = false;
                 let11 = this.game.add.bitmapText(this.game.width / 2 - 100, this.game.height / 2, 'scorefont', 'a', 50);
                 let12 = this.game.add.bitmapText(this.game.width / 2 - 50, this.game.height / 2, 'scorefont', '', 50);
                 let13 = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2, 'scorefont', '', 50);
@@ -236,6 +247,7 @@
                 p2back.onDown.add(this.p2back, this);
             } else {
                 p1ready = true;
+                //backbutton.visible = true;
             }
 
             p1ok = this.input.keyboard.addKey(Phaser.Keyboard.Z);
@@ -244,6 +256,8 @@
             backtomain.onDown.add(this.backtomain, this);
 
             if (highp2 && this.game.multiplay === true) {
+                knoppenscore.visible = true;
+                backbutton.visible = false;
                 let21 = this.game.add.bitmapText(this.game.width / 2 - 100, this.game.height / 2 + 180, 'scorefont', 'a', 50);
                 let22 = this.game.add.bitmapText(this.game.width / 2 - 50, this.game.height / 2 + 180, 'scorefont', '', 50);
                 let23 = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 180, 'scorefont', '', 50);
@@ -267,6 +281,7 @@
                 //p2back.onDown.add(this.p2back, this);
             } else {
                 p2ready = true;
+                //backbutton.visible = true;
             }
 
 
@@ -276,6 +291,7 @@
             // wat als beide geen highscore hebben behaald
             if (highp1 === false && highp2 === false) {
                 backbutton.visible = true;
+                knoppenscore.visible = false;
                 scorestext = this.game.add.bitmapText(this.game.width / 4 * 1.5, this.game.height / 2 + 80, 'scorefont', '1  = ' + nameArray[0] + '\n2 = ' + nameArray[1] + '\n3 = ' + nameArray[2] + '\n4 = ' + nameArray[3] + '\n5 = ' + nameArray[4], 50);
                 scorestext.anchor.setTo(0.5, 0.5);
                 scoresssss = this.game.add.bitmapText(this.game.width / 4 * 3, this.game.height / 2 + 90, 'scorefont', scoresArray[0] + '\n' + scoresArray[1] + '\n' + scoresArray[2] + '\n' + scoresArray[3] + '\n' + scoresArray[4], 50);
@@ -301,7 +317,7 @@
 
 
 
-            backbutton.visible = false;
+            //backbutton.visible = false;
 
         },
 
@@ -317,6 +333,7 @@
             //dudes.visible = true;
 
             if (p1ready && p2ready) {
+                knoppenscore.visible = false;
                 backbutton.visible = true;
                 dudes.visible = true;
                 scorestext = this.game.add.bitmapText(this.game.width / 4 * 1.5, this.game.height / 2 + 80, 'scorefont', '1  = ' + nameArray[0] + '\n2 = ' + nameArray[1] + '\n3 = ' + nameArray[2] + '\n4 = ' + nameArray[3] + '\n5 = ' + nameArray[4], 40);

@@ -75,26 +75,20 @@
       this.load.image('thumbs5', 'assets/thumbs5.png');
       this.load.image('thumbs6', 'assets/thumbs6.png');
       this.load.image('thumbsfilms', 'assets/thumbsfilms.png');
-
       this.load.image('knoppenfilm', 'assets/knoppenfilm.png');
       this.load.image('knoppenscore', 'assets/knoppenscore.png');
-
-
+      this.load.image('knoppenfilmwhite', 'assets/knoppenfilmwhite.png');
+      this.load.image('knoppenscorewhite', 'assets/knoppenscorewhite.png');
       //preload menu
-
       this.load.image('mode1pmini', 'assets/mode1pmini.png');
       this.load.image('mode2pteammini', 'assets/mode2pteammini.png');
       this.load.image('mode2pversusmini', 'assets/mode2pversusmini.png');
-
       this.load.image('mode1p', 'assets/mode1p.png');
       this.load.image('mode2pteam', 'assets/mode2pteam.png');
       this.load.image('mode2pversus', 'assets/mode2pversus.png');
-
       this.load.image('theater', 'assets/theater.png');
       this.load.image('theaterseats', 'assets/theaterseats.png');
       this.load.image('fill', 'assets/fill.png');
-
-
       this.load.image('uitleg1', 'assets/uitleg1.png');
       this.load.image('uitleg2', 'assets/uitleg2.png');
       this.load.image('uitleg3', 'assets/uitleg3.png');
@@ -102,9 +96,6 @@
       this.load.image('uitleg5', 'assets/uitleg5.png');
       this.load.image('uitleg6', 'assets/uitleg6.png');
       this.load.image('selectie', 'assets/selectie.png');
-
-
-
       // preload breakout
       this.load.atlas('breakout', 'assets/breakout.png', 'assets/breakout.json');
       this.load.image('starfield', 'assets/starfield.jpg');
@@ -137,7 +128,6 @@
       this.load.image('car1', 'assets/car1sh.png');
       this.load.image('flag', 'assets/flag.png');
       this.load.image('klokk', 'assets/klokk.png');
-
       this.load.image('checkp12', 'assets/checkp12.png');
       this.load.image('checkp3', 'assets/checkp3.png');
       //this.load.image('car2', 'assets/car2.png');
@@ -150,14 +140,11 @@
       this.load.image('p1life', 'assets/p1life.png');
       this.load.image('p2life', 'assets/p2life.png');
       this.load.spritesheet('dude', 'assets/dude.png', 32, 48);
-
       this.load.image('pbbg2', 'assets/pbbg.png');
       this.load.image('pbbg3', 'assets/pbbg2.png');
       //scoring
       this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
       this.loadResources();
-
-
       this.load.image('lifeup', 'assets/lifeup.png');
     },
 
