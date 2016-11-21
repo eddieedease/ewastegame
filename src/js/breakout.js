@@ -426,14 +426,14 @@
                 ballOnPaddle = true;
                 ball.body.velocity.set(0);
                 ball.x = paddle.x + 16;
-                ball.y = paddle.y - 16;
+                ball.y = paddle.y - 56;
                 ball.animations.stop();
 
                 if (this.game.multiplay === true) {
                     ballOnPaddle2 = true;
                     ball2.body.velocity.set(0);
                     ball2.x = paddle2.x + 16;
-                    ball2.y = paddle2.y - 16;
+                    ball2.y = paddle2.y - 56;
                     ball2.animations.stop();
                 }
 

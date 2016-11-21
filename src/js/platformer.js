@@ -499,7 +499,7 @@
                 case 3:
                     enemyspeed1 = 200;
                     enemyspeed2 = -200;
-                    var randomx = this.game.rnd.integerInRange(0, 1000);
+                    var randomx = this.game.rnd.integerInRange(20, 980);
                     lifeup.x = randomx;
                     lifeup.y = 0;
                     lifeactive = true;
