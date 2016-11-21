@@ -76,6 +76,11 @@
     var levens2 = 3;
 
 
+    var ledge1;
+    var ledge2;
+    var ledge3;
+    var ledge4;
+
     var lifeup;
 
     var round = 1;
@@ -131,6 +136,8 @@
             // Here we create the ground.
             platform = platforms.create(0, this.game.world.height - 70, 'platformground');
 
+            platform.alpha = 0.1;
+
             //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
             platform.scale.setTo(2, 2);
 
@@ -145,34 +152,34 @@
 
             switch (randomlegde) {
                 case 0:
-                    var ledge = platforms.create(400, 400, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(500, 125, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(100, 230, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(600, 300, 'platform');
-                    ledge.body.immovable = true;
+                    ledge1 = platforms.create(400, 400, 'platform');
+                    ledge1.body.immovable = true;
+                    ledge2 = platforms.create(500, 125, 'platform');
+                    ledge2.body.immovable = true;
+                    ledge3 = platforms.create(100, 230, 'platform');
+                    ledge3.body.immovable = true;
+                    ledge4 = platforms.create(600, 300, 'platform');
+                    ledge4.body.immovable = true;
                     break;
                 case 1:
-                    var ledge = platforms.create(100, 100, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(400, 400, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(300, 230, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(700, 300, 'platform');
-                    ledge.body.immovable = true;
+                    ledge1 = platforms.create(100, 100, 'platform');
+                    ledge1.body.immovable = true;
+                    ledge2 = platforms.create(400, 400, 'platform');
+                    ledge2.body.immovable = true;
+                    ledge3 = platforms.create(300, 230, 'platform');
+                    ledge3.body.immovable = true;
+                    ledge4 = platforms.create(700, 300, 'platform');
+                    ledge4.body.immovable = true;
                     break;
                 case 2:
-                    var ledge = platforms.create(100, 270, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(350, 170, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(600, 270, 'platform');
-                    ledge.body.immovable = true;
-                    ledge = platforms.create(350, 370, 'platform');
-                    ledge.body.immovable = true;
+                    ledge1 = platforms.create(100, 270, 'platform');
+                    ledge1.body.immovable = true;
+                    ledge2 = platforms.create(350, 170, 'platform');
+                    ledge2.body.immovable = true;
+                    ledge3 = platforms.create(600, 270, 'platform');
+                    ledge3.body.immovable = true;
+                    ledge4 = platforms.create(350, 370, 'platform');
+                    ledge4.body.immovable = true;
                     break;
             }
 
@@ -295,12 +302,12 @@
         },
         creditadd: function() {
 
-          credit = parseInt(credit) + 3;
+            credit = parseInt(credit) + 3;
 
-          localStorage.setItem('credits', credit);
+            localStorage.setItem('credits', credit);
 
-          this.game.aantalphones = this.game.aantalphones + 1;
-          localStorage.setItem('aantalphones', this.game.aantalphones);
+            this.game.aantalphones = this.game.aantalphones + 1;
+            localStorage.setItem('aantalphones', this.game.aantalphones);
             valid.visible = true;
             this.game.time.events.add(Phaser.Timer.SECOND * 3, this.creditgone, this);
         },
@@ -476,6 +483,7 @@
             }
         },
         levelup: function() {
+            this.changeledges();
             if (round < 9) {
                 round = round + 1;
             }
@@ -507,6 +515,7 @@
                     lifeup.revive();
                     break;
                 case 4:
+                    //this.changeledges();
                     bg1.visible = false;
                     bg2.visible = true;
                     bg3.visible = false;
@@ -556,6 +565,67 @@
         removelevelup: function() {
             levelup.destroy();
             leveluptween = null;
+        },
+        changeledges: function() {
+            // NOTE add the code for changing ledges
+            var randomlegde = this.game.rnd.integerInRange(0, 2);
+
+            switch (randomlegde) {
+                case 0:
+                    ledge1.x = 400;
+                    ledge1.y = 400;
+                    ledge2.x = 500;
+                    ledge2.y = 125;
+                    ledge3.x = 100;
+                    ledge3.y = 230;
+                    ledge4.x = 600;
+                    ledge4.y = 300;
+                    /*ledge1 = platforms.create(400, 400, 'platform');
+                    ledge1.body.immovable = true;
+                    ledge2 = platforms.create(500, 125, 'platform');
+                    ledge2.body.immovable = true;
+                    ledge3 = platforms.create(100, 230, 'platform');
+                    ledge3.body.immovable = true;
+                    ledge4 = platforms.create(600, 300, 'platform');
+                    ledge4.body.immovable = true;*/
+                    break;
+                case 1:
+                    ledge1.x = 100;
+                    ledge1.y = 100;
+                    ledge2.x = 400;
+                    ledge2.y = 400;
+                    ledge3.x = 300;
+                    ledge3.y = 230;
+                    ledge4.x = 700;
+                    ledge4.y = 300;
+                    /*ledge1 = platforms.create(100, 100, 'platform');
+                    ledge1.body.immovable = true;
+                    ledge2 = platfozrms.create(400, 400, 'platform');
+                    ledge2.body.immovable = true;
+                    ledge3 = platforms.create(300, 230, 'platform');
+                    ledge3.body.immovable = true;
+                    ledge4 = platforms.create(700, 300, 'platform');
+                    ledge4.body.immovable = true;*/
+                    break;
+                case 2:
+                    ledge1.x = 100;
+                    ledge1.y = 270;
+                    ledge2.x = 350;
+                    ledge2.y = 170;
+                    ledge3.x = 600;
+                    ledge3.y = 270;
+                    ledge4.x = 350;
+                    ledge4.y = 370;
+                    /*ledge1 = platforms.create(100, 270, 'platform');
+                    ledge1.body.immovable = true;
+                    ledge2 = platforms.create(350, 170, 'platform');
+                    ledge2.body.immovable = true;
+                    ledge3 = platforms.create(600, 270, 'platform');
+                    ledge3.body.immovable = true;
+                    ledge4 = platforms.create(350, 370, 'platform');
+                    ledge4.body.immovable = true;*/
+                    break;
+            }
         },
         collectlife: function(platplayer1, life) {
             {

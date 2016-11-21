@@ -116,7 +116,7 @@
 
 
 
-            knoppenscore = this.game.add.sprite(25, 400, 'knoppenscore');
+            knoppenscore = this.game.add.sprite(25, 385, 'knoppenscore');
             knoppenscore.visible = false;
 
             backbutton.visible = true;
