@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -221,6 +221,18 @@ Phaser.ScaleManager = function (game, width, height) {
     this.leaveIncorrectOrientation = new Phaser.Signal();
 
     /**
+    * This boolean provides you with a way to determine if the browser is in Full Screen
+    * mode (via the Full Screen API), and Phaser was the one responsible for activating it.
+    *
+    * It's possible that ScaleManager.isFullScreen returns `true` even if Phaser wasn't the
+    * one that made the browser go full-screen, so this flag lets you determine that.
+    * 
+    * @property {boolean} hasPhaserSetFullScreen
+    * @default
+    */
+    this.hasPhaserSetFullScreen = false;
+
+    /**
     * If specified, this is the DOM element on which the Fullscreen API enter request will be invoked.
     * The target element must have the correct CSS styling and contain the Display canvas.
     *
@@ -377,7 +389,7 @@ Phaser.ScaleManager = function (game, width, height) {
     *
     * @protected
     * 
-    * @property {boolean} [supportsFullscreen=(auto)] - True only if fullscreen support will be used. (Changing to fullscreen still might not work.)
+    * @property {boolean} [supportsFullScreen=(auto)] - True only if fullscreen support will be used. (Changing to fullscreen still might not work.)
     *
     * @property {boolean} [orientationFallback=(auto)] - See {@link Phaser.DOM.getScreenOrientation}.
     *
@@ -725,7 +737,7 @@ Phaser.ScaleManager.prototype = {
 
         this._booted = true;
 
-        if (this._pendingScaleMode)
+        if (this._pendingScaleMode !== null)
         {
             this.scaleMode = this._pendingScaleMode;
             this._pendingScaleMode = null;
@@ -742,7 +754,7 @@ Phaser.ScaleManager.prototype = {
     */
     parseConfig: function (config) {
 
-        if (config['scaleMode'])
+        if (config['scaleMode'] !== undefined)
         {
             if (this._booted)
             {
@@ -754,7 +766,7 @@ Phaser.ScaleManager.prototype = {
             }
         }
 
-        if (config['fullScreenScaleMode'])
+        if (config['fullScreenScaleMode'] !== undefined)
         {
             this.fullScreenScaleMode = config['fullScreenScaleMode'];
         }
@@ -844,6 +856,9 @@ Phaser.ScaleManager.prototype = {
             this.parentScaleFactor.y = parseInt(height, 10) / 100;
             newHeight = rect.height * this.parentScaleFactor.y;
         }
+
+        newWidth = Math.floor(newWidth);
+        newHeight = Math.floor(newHeight);
 
         this._gameSize.setTo(0, 0, newWidth, newHeight);
 
@@ -1757,9 +1772,11 @@ Phaser.ScaleManager.prototype = {
         {
             // Error is called in timeout to emulate the real fullscreenerror event better
             var _this = this;
+
             setTimeout(function () {
                 _this.fullScreenError();
             }, 10);
+
             return;
         }
 
@@ -1776,7 +1793,7 @@ Phaser.ScaleManager.prototype = {
             }
         }
 
-        if (typeof antialias !== 'undefined' && this.game.renderType === Phaser.CANVAS)
+        if (antialias !== undefined && this.game.renderType === Phaser.CANVAS)
         {
             this.game.stage.smoothed = antialias;
         }
@@ -1794,6 +1811,8 @@ Phaser.ScaleManager.prototype = {
         var initData = {
             targetElement: fsTarget
         };
+
+        this.hasPhaserSetFullScreen = true;
 
         this.onFullScreenInit.dispatch(this, initData);
 
@@ -1833,6 +1852,8 @@ Phaser.ScaleManager.prototype = {
         {
             return false;
         }
+
+        this.hasPhaserSetFullScreen = false;
 
         document[this.game.device.cancelFullscreen]();
 
@@ -2080,14 +2101,17 @@ Phaser.ScaleManager.prototype.constructor = Phaser.ScaleManager;
 Object.defineProperty(Phaser.ScaleManager.prototype, "boundingParent", {
 
     get: function () {
+
         if (this.parentIsWindow ||
-            (this.isFullScreen && !this._createdFullScreenTarget))
+            (this.isFullScreen && this.hasPhaserSetFullScreen && !this._createdFullScreenTarget))
         {
             return null;
         }
 
         var parentNode = this.game.canvas && this.game.canvas.parentNode;
+
         return parentNode || null;
+
     }
 
 });

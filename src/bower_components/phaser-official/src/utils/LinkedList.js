@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -179,7 +179,7 @@ Phaser.LinkedList.prototype = {
             entity = entity.next;
 
         }
-        while(entity != this.last.next);
+        while (entity !== this.last.next);
 
     }
 

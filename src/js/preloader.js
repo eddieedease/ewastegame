@@ -11,6 +11,10 @@
       // preload preloader
       this.asset = this.add.sprite(this.game.width * 0.5 - 110, this.game.height * 0.5 - 10, 'preloader');
       this.load.setPreloadSprite(this.asset);
+
+
+      // json config file..
+      this.load.json('needy', 'assets/json/this.json');
       // load audio files first..
       this.load.audio('menu', ['assets/audio/menu.ogg']);
       this.load.audio('platformer', ['assets/audio/platformer.ogg']);

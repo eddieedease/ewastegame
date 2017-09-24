@@ -113,6 +113,16 @@ PIXI.Graphics = function()
     this.dirty = true;
 
     /**
+     * Used to detect if the bounds have been invalidated, by this Graphics being cleared or drawn to.
+     * If this is set to true then the updateLocalBounds is called once in the postUpdate method.
+     * 
+     * @property _boundsDirty
+     * @type Boolean
+     * @private
+     */
+    this._boundsDirty = false;
+
+    /**
      * Used to detect if the webgl graphics object has changed. If this is set to true then the graphics object will be recalculated.
      * 
      * @property webGLDirty
@@ -203,6 +213,7 @@ PIXI.Graphics.prototype.lineTo = function(x, y)
 
     this.currentPath.shape.points.push(x, y);
     this.dirty = true;
+    this._boundsDirty = true;
 
     return this;
 };
@@ -257,6 +268,7 @@ PIXI.Graphics.prototype.quadraticCurveTo = function(cpX, cpY, toX, toY)
     }
 
     this.dirty = true;
+    this._boundsDirty = true;
 
     return this;
 };
@@ -315,6 +327,7 @@ PIXI.Graphics.prototype.bezierCurveTo = function(cpX, cpY, cpX2, cpY2, toX, toY)
     }
     
     this.dirty = true;
+    this._boundsDirty = true;
 
     return this;
 };
@@ -384,6 +397,7 @@ PIXI.Graphics.prototype.arcTo = function(x1, y1, x2, y2, radius)
     }
 
     this.dirty = true;
+    this._boundsDirty = true;
 
     return this;
 };
@@ -398,9 +412,10 @@ PIXI.Graphics.prototype.arcTo = function(x1, y1, x2, y2, radius)
  * @param startAngle {Number} The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
  * @param endAngle {Number} The ending angle, in radians
  * @param anticlockwise {Boolean} Optional. Specifies whether the drawing should be counterclockwise or clockwise. False is default, and indicates clockwise, while true indicates counter-clockwise.
+ * @param segments {Number} Optional. The number of segments to use when calculating the arc. The default is 40. If you need more fidelity use a higher number.
  * @return {Graphics}
  */
-PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, anticlockwise)
+PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, anticlockwise, segments)
 {
     //  If we do this we can never draw a full circle
     if (startAngle === endAngle)
@@ -409,6 +424,7 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
     }
 
     if (anticlockwise === undefined) { anticlockwise = false; }
+    if (segments === undefined) { segments = 40; }
 
     if (!anticlockwise && endAngle <= startAngle)
     {
@@ -420,7 +436,7 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
     }
 
     var sweep = anticlockwise ? (startAngle - endAngle) * -1 : (endAngle - startAngle);
-    var segs =  Math.ceil(Math.abs(sweep) / (Math.PI * 2)) * 40;
+    var segs =  Math.ceil(Math.abs(sweep) / (Math.PI * 2)) * segments;
 
     //  Sweep check - moved here because we don't want to do the moveTo below if the arc fails
     if (sweep === 0)
@@ -467,6 +483,7 @@ PIXI.Graphics.prototype.arc = function(cx, cy, radius, startAngle, endAngle, ant
     }
 
     this.dirty = true;
+    this._boundsDirty = true;
 
     return this;
 };
@@ -625,8 +642,11 @@ PIXI.Graphics.prototype.clear = function()
     this.filling = false;
 
     this.dirty = true;
+    this._boundsDirty = true;
     this.clearDirty = true;
     this.graphicsData = [];
+
+    this.updateLocalBounds();
 
     return this;
 };
@@ -636,27 +656,32 @@ PIXI.Graphics.prototype.clear = function()
  * This can be quite useful if your geometry is complicated and needs to be reused multiple times.
  *
  * @method generateTexture
- * @param resolution {Number} The resolution of the texture being generated
- * @param scaleMode {Number} Should be one of the PIXI.scaleMode consts
+ * @param [resolution=1] {Number} The resolution of the texture being generated
+ * @param [scaleMode=0] {Number} Should be one of the PIXI.scaleMode consts
+ * @param [padding=0] {Number} Add optional extra padding to the generated texture (default 0)
  * @return {Texture} a texture of the graphics object
  */
-PIXI.Graphics.prototype.generateTexture = function(resolution, scaleMode)
+PIXI.Graphics.prototype.generateTexture = function(resolution, scaleMode, padding)
 {
-    resolution = resolution || 1;
+    if (resolution === undefined) { resolution = 1; }
+    if (scaleMode === undefined) { scaleMode = PIXI.scaleModes.DEFAULT; }
+    if (padding === undefined) { padding = 0; }
 
     var bounds = this.getBounds();
+
+    bounds.width += padding;
+    bounds.height += padding;
    
     var canvasBuffer = new PIXI.CanvasBuffer(bounds.width * resolution, bounds.height * resolution);
     
     var texture = PIXI.Texture.fromCanvas(canvasBuffer.canvas, scaleMode);
+
     texture.baseTexture.resolution = resolution;
 
     canvasBuffer.context.scale(resolution, resolution);
 
     canvasBuffer.context.translate(-bounds.x, -bounds.y);
 
-    //  Call here
-    
     PIXI.CanvasGraphics.renderGraphics(this, canvasBuffer.context);
 
     return texture;
@@ -795,13 +820,15 @@ PIXI.Graphics.prototype._renderCanvas = function(renderSession)
         }
 
         var resolution = renderSession.resolution;
+        var tx = (transform.tx * renderSession.resolution) + renderSession.shakeX;
+        var ty = (transform.ty * renderSession.resolution) + renderSession.shakeY;
 
         context.setTransform(transform.a * resolution,
                              transform.b * resolution,
                              transform.c * resolution,
                              transform.d * resolution,
-                             transform.tx * resolution,
-                             transform.ty * resolution);
+                             tx,
+                             ty);
 
         PIXI.CanvasGraphics.renderGraphics(this, context);
 
@@ -904,6 +931,32 @@ PIXI.Graphics.prototype.getBounds = function(matrix)
 
     return this._currentBounds;
 
+};
+
+/**
+ * Retrieves the non-global local bounds of the graphic shape as a rectangle. The calculation takes all visible children into consideration.
+ *
+ * @method getLocalBounds
+ * @return {Rectangle} The rectangular bounding area
+ */
+PIXI.Graphics.prototype.getLocalBounds = function () {
+    var matrixCache = this.worldTransform;
+
+    this.worldTransform = PIXI.identityMatrix;
+
+    for (var i = 0; i < this.children.length; i++) {
+        this.children[i].updateTransform();
+    }
+
+    var bounds = this.getBounds();
+
+    this.worldTransform = matrixCache;
+
+    for (i = 0; i < this.children.length; i++) {
+        this.children[i].updateTransform();
+    }
+
+    return bounds;
 };
 
 /**
@@ -1166,8 +1219,10 @@ PIXI.Graphics.prototype.drawShape = function(shape)
     }
 
     this.dirty = true;
+    this._boundsDirty = true;
 
     return data;
+
 };
 
 /**
@@ -1198,8 +1253,10 @@ Object.defineProperty(PIXI.Graphics.prototype, "cacheAsBitmap", {
         else
         {
             this.destroyCachedSprite();
-            this.dirty = true;
         }
+
+        this.dirty = true;
+        this.webGLDirty = true;
 
     }
 });

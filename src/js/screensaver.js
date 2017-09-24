@@ -57,6 +57,10 @@
         create: function() {
             credit = localStorage.getItem('credits');
             video = null;
+
+
+            var phaserJSON = this.game.cache.getJSON('needy');
+            console.log(phaserJSON);
             /*canvas = this.game.add.bitmapData(1000, 563);
             canvas.addToWorld();
 

@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -134,7 +134,7 @@ Phaser.Net.prototype = {
 
             if (key.length > 1)
             {
-                if (parameter && parameter == this.decodeURI(key[0]))
+                if (parameter && parameter === this.decodeURI(key[0]))
                 {
                     return this.decodeURI(key[1]);
                 }
@@ -150,8 +150,8 @@ Phaser.Net.prototype = {
     },
 
     /**
-    * Returns the Query String as an object.
-    * If you specify a parameter it will return just the value of that parameter, should it exist.
+    * Takes a Uniform Resource Identifier (URI) component (previously created by encodeURIComponent or by a similar routine) and
+    * decodes it, replacing \ with spaces in the return. Used internally by the Net classes.
     *
     * @method Phaser.Net#decodeURI
     * @param {string} value - The URI component to be decoded.

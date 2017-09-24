@@ -1,11 +1,14 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
 /**
 * Creates a new Phaser.Tilemap object. The map can either be populated with data from a Tiled JSON file or from a CSV file.
+*
+* Tiled is a free software package specifically for creating tile maps, and is available from http://www.mapeditor.org
+* 
 * To do this pass the Cache key as the first parameter. When using Tiled data you need only provide the key.
 * When using CSV data you must provide the key and the tileWidth and tileHeight parameters.
 * If creating a blank tilemap to be populated later, you can either specify no parameters at all and then use `Tilemap.create` or pass the map and tile dimensions here.
@@ -132,6 +135,11 @@ Phaser.Tilemap = function (game, key, tileWidth, tileHeight, width, height) {
     this.images = data.images;
 
     /**
+    * @property {boolean} enableDebug - If set then console.log is used to dump out useful layer creation debug data.
+    */
+    this.enableDebug = false;
+
+    /**
     * @property {number} currentLayer - The current layer.
     */
     this.currentLayer = 0;
@@ -253,8 +261,8 @@ Phaser.Tilemap.prototype = {
     *     You can also pass in a BitmapData which can be used instead of an Image.
     * @param {number} [tileWidth=32] - The width of the tiles in the Tileset Image. If not given it will default to the map.tileWidth value, if that isn't set then 32.
     * @param {number} [tileHeight=32] - The height of the tiles in the Tileset Image. If not given it will default to the map.tileHeight value, if that isn't set then 32.
-    * @param {number} [tileMargin=0] - The width of the tiles in the Tileset Image. If not given it will default to the map.tileWidth value.
-    * @param {number} [tileSpacing=0] - The height of the tiles in the Tileset Image. If not given it will default to the map.tileHeight value.
+    * @param {number} [tileMargin=0] - The width of the tiles in the Tileset Image.
+    * @param {number} [tileSpacing=0] - The height of the tiles in the Tileset Image.
     * @param {number} [gid=0] - If adding multiple tilesets to a blank/dynamic map, specify the starting GID the set will use here.
     * @return {Phaser.Tileset} Returns the Tileset object that was created or updated, or null if it failed.
     */
@@ -304,7 +312,7 @@ Phaser.Tilemap.prototype = {
 
         if (idx === null && this.format === Phaser.Tilemap.TILED_JSON)
         {
-            console.warn('Phaser.Tilemap.addTilesetImage: No data found in the JSON matching the tileset name: "' + key + '"');
+            console.warn('Phaser.Tilemap.addTilesetImage: No data found in the JSON matching the tileset name: "' + tileset + '"');
             return null;
         }
 
@@ -584,9 +592,45 @@ Phaser.Tilemap.prototype = {
             return;
         }
 
-        return group.add(new Phaser.TilemapLayer(this.game, this, index, width, height));
+        //  Sort out the display dimensions, so they never render too much, or too little.
+
+        if (width === undefined || width <= 0)
+        {
+            width = Math.min(this.game.width, this.layers[index].widthInPixels);
+        }
+        else if (width > this.game.width)
+        {
+            width = this.game.width;
+        }
+
+        if (height === undefined || height <= 0)
+        {
+            height = Math.min(this.game.height, this.layers[index].heightInPixels);
+        }
+        else if (height > this.game.height)
+        {
+            height = this.game.height;
+        }
+
+        if (this.enableDebug)
+        {
+            console.group('Tilemap.createLayer');
+            console.log('Name:', this.layers[index].name);
+            console.log('Size:', width, 'x', height);
+            console.log('Tileset:', this.tilesets[0].name, 'index:', index);
+        }
+
+        var rootLayer = group.add(new Phaser.TilemapLayer(this.game, this, index, width, height));
+
+        if (this.enableDebug)
+        {
+            console.groupEnd();
+        }
+
+        return rootLayer;
 
     },
+
 
     /**
     * Creates a new and empty layer on this Tilemap. By default TilemapLayers are fixed to the camera.
@@ -606,7 +650,7 @@ Phaser.Tilemap.prototype = {
 
         if (this.getLayerIndex(name) !== null)
         {
-            console.warn('Tilemap.createBlankLayer: Layer with matching name already exists');
+            console.warn('Tilemap.createBlankLayer: Layer with matching name already exists: ' + name);
             return;
         }
 
@@ -638,7 +682,6 @@ Phaser.Tilemap.prototype = {
 
             for (var x = 0; x < width; x++)
             {
-                // row.push(null);
                 row.push(new Phaser.Tile(layer, -1, x, y, tileWidth, tileHeight));
             }
 
@@ -730,19 +773,6 @@ Phaser.Tilemap.prototype = {
     getImageIndex: function (name) {
 
         return this.getIndex(this.images, name);
-
-    },
-
-    /**
-    * Gets the object index based on its name.
-    *
-    * @method Phaser.Tilemap#getObjectIndex
-    * @param {string} name - The name of the object to get.
-    * @return {number} The index of the object in this tilemap, or null if not found.
-    */
-    getObjectIndex: function (name) {
-
-        return this.getIndex(this.objects, name);
 
     },
 
@@ -1219,6 +1249,11 @@ Phaser.Tilemap.prototype = {
     hasTile: function (x, y, layer) {
 
         layer = this.getLayer(layer);
+
+        if (this.layers[layer].data[y] === undefined || this.layers[layer].data[y][x] === undefined)
+        {
+            return false;
+        }
 
         return (this.layers[layer].data[y][x].index > -1);
 

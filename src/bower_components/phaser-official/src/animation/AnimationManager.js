@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -207,9 +207,6 @@ Phaser.AnimationManager.prototype = {
 
         this.currentAnim = this._anims[name];
 
-        //  This shouldn't be set until the Animation is played, surely?
-        // this.currentFrame = this.currentAnim.currentFrame;
-
         if (this.sprite.tilingTexture)
         {
             this.sprite.refreshTexture = true;
@@ -308,20 +305,9 @@ Phaser.AnimationManager.prototype = {
 
         if (resetFrame === undefined) { resetFrame = false; }
 
-        if (typeof name === 'string')
+        if (this.currentAnim && (typeof name !== 'string' || name === this.currentAnim.name))
         {
-            if (this._anims[name])
-            {
-                this.currentAnim = this._anims[name];
-                this.currentAnim.stop(resetFrame);
-            }
-        }
-        else
-        {
-            if (this.currentAnim)
-            {
-                this.currentAnim.stop(resetFrame);
-            }
+            this.currentAnim.stop(resetFrame);
         }
 
     },
@@ -411,7 +397,7 @@ Phaser.AnimationManager.prototype = {
     refreshFrame: function () {
 
         //  TODO
-        this.sprite.setTexture(PIXI.TextureCache[this.currentFrame.uuid]);
+        // this.sprite.setTexture(PIXI.TextureCache[this.currentFrame.uuid]);
 
     },
 

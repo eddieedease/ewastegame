@@ -9,14 +9,9 @@
  * @extends DisplayObjectContainer
  * @constructor
  * @param texture {Texture} The texture for this sprite
- *
- * A sprite can be created directly from an image like this :
- * var sprite = new PIXI.Sprite.fromImage('assets/image.png');
- * yourStage.addChild(sprite);
- * then obviously don't forget to add it to the stage you have already created
  */
-PIXI.Sprite = function(texture)
-{
+PIXI.Sprite = function (texture) {
+
     PIXI.DisplayObjectContainer.call(this);
 
     /**
@@ -96,13 +91,23 @@ PIXI.Sprite = function(texture)
     this.blendMode = PIXI.blendModes.NORMAL;
 
     /**
-     * The shader that will be used to render the texture to the stage. Set to null to remove a current shader.
+     * The shader that will be used to render this Sprite.
+     * Set to null to remove a current shader.
      *
      * @property shader
      * @type AbstractFilter
      * @default null
      */
     this.shader = null;
+
+    /**
+    * Controls if this Sprite is processed by the core Phaser game loops and Group loops.
+    *
+    * @property exists
+    * @type Boolean
+    * @default true
+    */
+    this.exists = true;
 
     if (this.texture.baseTexture.hasLoaded)
     {
@@ -170,8 +175,11 @@ PIXI.Sprite.prototype.setTexture = function(texture, destroyBase)
         this.texture.baseTexture.destroy();
     }
 
+    //  Over-ridden by loadTexture as needed
+    this.texture.baseTexture.skipRender = false;
     this.texture = texture;
     this.texture.valid = true;
+    this.cachedTint = -1;
 };
 
 /**
@@ -189,7 +197,15 @@ PIXI.Sprite.prototype.onTextureUpdate = function()
 };
 
 /**
-* Returns the bounds of the Sprite as a rectangle. The bounds calculation takes the worldTransform into account.
+* Returns the bounds of the Sprite as a rectangle.
+* The bounds calculation takes the worldTransform into account.
+*
+* It is important to note that the transform is not updated when you call this method.
+* So if this Sprite is the child of a Display Object which has had its transform
+* updated since the last render pass, those changes will not yet have been applied
+* to this Sprites worldTransform. If you need to ensure that all parent transforms
+* are factored into this getBounds operation then you should call `updateTransform`
+* on the root most object in this Sprites display list first.
 *
 * @method getBounds
 * @param matrix {Matrix} the transformation matrix of the sprite
@@ -294,6 +310,36 @@ PIXI.Sprite.prototype.getBounds = function(matrix)
     this._currentBounds = bounds;
 
     return bounds;
+};
+
+/**
+ * Retrieves the non-global local bounds of the Sprite as a rectangle. The calculation takes all visible children into consideration.
+ *
+ * @method getLocalBounds
+ * @return {Rectangle} The rectangular bounding area
+ */
+PIXI.Sprite.prototype.getLocalBounds = function () {
+
+    var matrixCache = this.worldTransform;
+
+    this.worldTransform = PIXI.identityMatrix;
+
+    for (var i = 0; i < this.children.length; i++)
+    {
+        this.children[i].updateTransform();
+    }
+
+    var bounds = this.getBounds();
+
+    this.worldTransform = matrixCache;
+
+    for (i = 0; i < this.children.length; i++)
+    {
+        this.children[i].updateTransform();
+    }
+
+    return bounds;
+
 };
 
 /**
@@ -408,7 +454,7 @@ PIXI.Sprite.prototype._renderCanvas = function(renderSession, matrix)
 
         renderSession.context.globalAlpha = this.worldAlpha;
 
-         //  If smoothingEnabled is supported and we need to change the smoothing property for this texture
+        //  If smoothingEnabled is supported and we need to change the smoothing property for this texture
         if (renderSession.smoothProperty && renderSession.scaleMode !== this.texture.baseTexture.scaleMode)
         {
             renderSession.scaleMode = this.texture.baseTexture.scaleMode;
@@ -419,16 +465,19 @@ PIXI.Sprite.prototype._renderCanvas = function(renderSession, matrix)
         var dx = (this.texture.trim) ? this.texture.trim.x - this.anchor.x * this.texture.trim.width : this.anchor.x * -this.texture.frame.width;
         var dy = (this.texture.trim) ? this.texture.trim.y - this.anchor.y * this.texture.trim.height : this.anchor.y * -this.texture.frame.height;
 
+        var tx = (wt.tx * renderSession.resolution) + renderSession.shakeX;
+        var ty = (wt.ty * renderSession.resolution) + renderSession.shakeY;
+
         //  Allow for pixel rounding
         if (renderSession.roundPixels)
         {
-            renderSession.context.setTransform(wt.a, wt.b, wt.c, wt.d, (wt.tx * renderSession.resolution) | 0, (wt.ty * renderSession.resolution) | 0);
+            renderSession.context.setTransform(wt.a, wt.b, wt.c, wt.d, tx | 0, ty | 0);
             dx |= 0;
             dy |= 0;
         }
         else
         {
-            renderSession.context.setTransform(wt.a, wt.b, wt.c, wt.d, wt.tx * renderSession.resolution, wt.ty * renderSession.resolution);
+            renderSession.context.setTransform(wt.a, wt.b, wt.c, wt.d, tx, ty);
         }
 
         var cw = this.texture.crop.width;
@@ -444,6 +493,7 @@ PIXI.Sprite.prototype._renderCanvas = function(renderSession, matrix)
                 this.tintedTexture = PIXI.CanvasTinter.getTintedTexture(this, this.tint);
 
                 this.cachedTint = this.tint;
+                this.texture.requiresReTint = false;
             }
 
             renderSession.context.drawImage(this.tintedTexture, 0, 0, cw, ch, dx, dy, cw / resolution, ch / resolution);
@@ -466,42 +516,4 @@ PIXI.Sprite.prototype._renderCanvas = function(renderSession, matrix)
         renderSession.maskManager.popMask(renderSession);
     }
 
-};
-
-// some helper functions..
-
-/**
- *
- * Helper function that creates a sprite that will contain a texture from the TextureCache based on the frameId
- * The frame ids are created when a Texture packer file has been loaded
- *
- * @method fromFrame
- * @static
- * @param frameId {String} The frame Id of the texture in the cache
- * @return {Sprite} A new Sprite using a texture from the texture cache matching the frameId
- */
-PIXI.Sprite.fromFrame = function(frameId)
-{
-    var texture = PIXI.TextureCache[frameId];
-
-    if (!texture) throw new Error('The frameId "' + frameId + '" does not exist in the texture cache' + this);
-
-    return new PIXI.Sprite(texture);
-};
-
-/**
- *
- * Helper function that creates a sprite that will contain a texture based on an image url
- * If the image is not in the texture cache it will be loaded
- *
- * @method fromImage
- * @static
- * @param imageId {String} The image url of the texture
- * @return {Sprite} A new Sprite using a texture from the texture cache matching the image id
- */
-PIXI.Sprite.fromImage = function(imageId, crossorigin, scaleMode)
-{
-    var texture = PIXI.Texture.fromImage(imageId, crossorigin, scaleMode);
-
-    return new PIXI.Sprite(texture);
 };

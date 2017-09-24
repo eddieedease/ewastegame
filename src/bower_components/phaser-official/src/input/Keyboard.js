@@ -1,6 +1,6 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
@@ -9,6 +9,10 @@
 *
 * _Note_: many keyboards are unable to process certain combinations of keys due to hardware limitations known as ghosting.
 * See http://www.html5gamedevs.com/topic/4876-impossible-to-use-more-than-2-keyboard-input-buttons-at-the-same-time/ for more details.
+*
+* Also please be aware that certain browser extensions can disable or override Phaser keyboard handling.
+* For example the Chrome extension vimium is known to disable Phaser from using the D key. And there are others.
+* So please check your extensions before opening Phaser issues.
 *
 * @class Phaser.Keyboard
 * @constructor
@@ -372,20 +376,22 @@ Phaser.Keyboard.prototype = {
             return;
         }
 
+        var key = event.keyCode;
+
         //   The event is being captured but another hotkey may need it
-        if (this._capture[event.keyCode])
+        if (this._capture[key])
         {
             event.preventDefault();
         }
 
-        if (!this._keys[event.keyCode])
+        if (!this._keys[key])
         {
-            this._keys[event.keyCode] = new Phaser.Key(this.game, event.keyCode);
+            this._keys[key] = new Phaser.Key(this.game, key);
         }
 
-        this._keys[event.keyCode].processKeyDown(event);
+        this._keys[key].processKeyDown(event);
 
-        this._k = event.keyCode;
+        this._k = key;
 
         if (this.onDownCallback)
         {
@@ -433,17 +439,19 @@ Phaser.Keyboard.prototype = {
             return;
         }
 
-        if (this._capture[event.keyCode])
+        var key = event.keyCode;
+
+        if (this._capture[key])
         {
             event.preventDefault();
         }
 
-        if (!this._keys[event.keyCode])
+        if (!this._keys[key])
         {
-            this._keys[event.keyCode] = new Phaser.Key(this.game, event.keyCode);
+            this._keys[key] = new Phaser.Key(this.game, key);
         }
 
-        this._keys[event.keyCode].processKeyUp(event);
+        this._keys[key].processKeyUp(event);
 
         if (this.onUpCallback)
         {
@@ -596,7 +604,7 @@ Phaser.Keyboard.prototype.constructor = Phaser.Keyboard;
 * _Note_: Use `Phaser.KeyCode.KEY` instead of `Phaser.Keyboard.KEY` to refer to a key code;
 * the latter approach is supported for compatibility.
 *
-* @namespace
+* @class Phaser.KeyCode
 */
 Phaser.KeyCode = {
     /** @static */
@@ -806,8 +814,10 @@ Phaser.KeyCode = {
 };
 
 // Duplicate Phaser.KeyCode values in Phaser.Keyboard for compatibility
-for (var key in Phaser.KeyCode) {
-    if (Phaser.KeyCode.hasOwnProperty(key) && !key.match(/[a-z]/)) {
+for (var key in Phaser.KeyCode)
+{
+    if (Phaser.KeyCode.hasOwnProperty(key) && !key.match(/[a-z]/))
+    {
         Phaser.Keyboard[key] = Phaser.KeyCode[key];
     }
 }

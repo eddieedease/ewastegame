@@ -1,12 +1,12 @@
 /**
 * @author       Richard Davey <rich@photonstorm.com>
-* @copyright    2015 Photon Storm Ltd.
+* @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
 /**
 * An Animation instance contains a single animation and the controls to play it.
-* 
+*
 * It is created by the AnimationManager, consists of Animation.Frame objects and belongs to a single Game Object such as a Sprite.
 *
 * @class Phaser.Animation
@@ -18,7 +18,6 @@
 * @param {number[]|string[]} frames - An array of numbers or strings indicating which frames to play in which order.
 * @param {number} [frameRate=60] - The speed at which the animation should play. The speed is given in frames per second.
 * @param {boolean} [loop=false] - Whether or not the animation is looped or just plays once.
-* @param {boolean} loop - Should this animation loop when it reaches the end or play through once.
 */
 Phaser.Animation = function (game, parent, name, frameData, frames, frameRate, loop) {
 
@@ -131,8 +130,11 @@ Phaser.Animation = function (game, parent, name, frameData, frames, frameRate, l
     this.onStart = new Phaser.Signal();
 
     /**
-    * This event is dispatched when the Animation changes frame. 
+    * This event is dispatched when the Animation changes frame.
     * By default this event is disabled due to its intensive nature. Enable it with: `Animation.enableUpdate = true`.
+    * Note that the event is only dispatched with the current frame. In a low-FPS environment Animations
+    * will automatically frame-skip to try and claw back time, so do not base your code on expecting to
+    * receive a perfectly sequential set of frames from this event.
     * @property {Phaser.Signal|null} onUpdate
     * @default
     */
@@ -147,6 +149,12 @@ Phaser.Animation = function (game, parent, name, frameData, frames, frameRate, l
     * @property {Phaser.Signal} onLoop - This event is dispatched when this Animation loops.
     */
     this.onLoop = new Phaser.Signal();
+
+    /**
+     * @property {boolean} isReversed - Indicates if the animation will play backwards.
+     * @default
+     */
+    this.isReversed = false;
 
     //  Set-up some event listeners
     this.game.onPause.add(this.onPause, this);
@@ -193,7 +201,7 @@ Phaser.Animation.prototype = {
         this._timeLastFrame = this.game.time.time;
         this._timeNextFrame = this.game.time.time + this.delay;
 
-        this._frameIndex = 0;
+        this._frameIndex = this.isReversed ? this._frames.length - 1 : 0;
         this.updateCurrentFrame(false, true);
 
         this._parent.events.onAnimationStart$dispatch(this._parent, this);
@@ -236,6 +244,36 @@ Phaser.Animation.prototype = {
     },
 
     /**
+    * Reverses the animation direction.
+    *
+    * @method Phaser.Animation#reverse
+    * @return {Phaser.Animation} The animation instance.
+    */
+    reverse: function () {
+
+        this.reversed = !this.reversed;
+
+        return this;
+
+    },
+
+    /**
+    * Reverses the animation direction for the current/next animation only
+    * Once the onComplete event is called this method will be called again and revert
+    * the reversed state.
+    *
+    * @method Phaser.Animation#reverseOnce
+    * @return {Phaser.Animation} The animation instance.
+    */
+    reverseOnce: function () {
+
+        this.onComplete.addOnce(this.reverse, this);
+
+        return this.reverse();
+
+    },
+
+    /**
     * Sets this animations playback to a given frame with the given ID.
     *
     * @method Phaser.Animation#setFrame
@@ -272,7 +310,7 @@ Phaser.Animation.prototype = {
             {
                 for (var i = 0; i < this._frames.length; i++)
                 {
-                    if (this._frames[i] === frameIndex)
+                    if (this._frames[i] === frameId)
                     {
                         frameIndex = i;
                     }
@@ -383,14 +421,27 @@ Phaser.Animation.prototype = {
             //  And what's left now?
             this._timeNextFrame = this.game.time.time + (this.delay - this._frameDiff);
 
-            this._frameIndex += this._frameSkip;
+            if (this.isReversed)
+            {
+                this._frameIndex -= this._frameSkip;
+            }
+            else
+            {
+                this._frameIndex += this._frameSkip;
+            }
 
-            if (this._frameIndex >= this._frames.length)
+            if (!this.isReversed && this._frameIndex >= this._frames.length || this.isReversed && this._frameIndex <= -1)
             {
                 if (this.loop)
                 {
                     // Update current state before event callback
-                    this._frameIndex %= this._frames.length;
+                    this._frameIndex = Math.abs(this._frameIndex) % this._frames.length;
+
+                    if (this.isReversed)
+                    {
+                        this._frameIndex = this._frames.length - 1 - this._frameIndex;
+                    }
+
                     this.currentFrame = this._frameData.getFrame(this._frames[this._frameIndex]);
 
                     //  Instead of calling updateCurrentFrame we do it here instead
@@ -452,7 +503,7 @@ Phaser.Animation.prototype = {
             // The animation is already destroyed, probably from a callback
             return false;
         }
-            
+
         //  Previous index
         var idx = this.currentFrame.index;
 
@@ -653,6 +704,26 @@ Object.defineProperty(Phaser.Animation.prototype, 'paused', {
 });
 
 /**
+* @name Phaser.Animation#reversed
+* @property {boolean} reversed - Gets and sets the isReversed state of this Animation.
+*/
+Object.defineProperty(Phaser.Animation.prototype, 'reversed', {
+
+    get: function () {
+
+        return this.isReversed;
+
+    },
+
+    set: function (value) {
+
+        this.isReversed = value;
+
+    }
+
+});
+
+/**
 * @name Phaser.Animation#frameTotal
 * @property {number} frameTotal - The total number of frames in the currently loaded FrameData, or -1 if no FrameData is loaded.
 * @readonly
@@ -705,19 +776,19 @@ Object.defineProperty(Phaser.Animation.prototype, 'frame', {
 
 /**
 * @name Phaser.Animation#speed
-* @property {number} speed - Gets or sets the current speed of the animation in frames per second. Changing this in a playing animation will take effect from the next frame. Minimum value is 1.
+* @property {number} speed - Gets or sets the current speed of the animation in frames per second. Changing this in a playing animation will take effect from the next frame. Value must be greater than 0.
 */
 Object.defineProperty(Phaser.Animation.prototype, 'speed', {
 
     get: function () {
 
-        return Math.round(1000 / this.delay);
+        return 1000 / this.delay;
 
     },
 
     set: function (value) {
 
-        if (value >= 1)
+        if (value > 0)
         {
             this.delay = 1000 / value;
         }

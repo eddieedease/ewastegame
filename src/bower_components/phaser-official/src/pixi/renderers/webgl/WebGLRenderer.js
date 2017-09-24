@@ -254,9 +254,6 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
         return;
     }
 
-    // update the scene graph
-    stage.updateTransform();
-
     var gl = this.gl;
 
     // -- Does this need to be set every frame? -- //
@@ -271,6 +268,9 @@ PIXI.WebGLRenderer.prototype.render = function(stage)
 
         gl.clear(gl.COLOR_BUFFER_BIT);
     }
+
+    this.offset.x = this.game.camera._shake.x;
+    this.offset.y = this.game.camera._shake.y;
 
     this.renderDisplayObject(stage, this.projection);
 };
